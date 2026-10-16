@@ -2,6 +2,7 @@ package com.supportai.controller;
 
 import com.supportai.dto.RoleUpdateRequest;
 import com.supportai.dto.TicketAssignmentRequest;
+import com.supportai.dto.TicketClassificationUpdateRequest;
 import com.supportai.dto.TicketResponse;
 import com.supportai.dto.UserResponse;
 import com.supportai.service.UserService;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.supportai.service.TicketService;
@@ -53,6 +55,20 @@ public class AdminController {
                         );
 
         return ResponseEntity.ok(response);
+    }
+    
+    @PatchMapping("/tickets/{ticketId}/classification")
+    @PreAuthorize("hasRole('ADMIN')")
+    public TicketResponse updateTicketClassification(
+            @PathVariable Long ticketId,
+            @Valid @RequestBody TicketClassificationUpdateRequest request,
+            Authentication authentication) {
+
+        return ticketService.updateTicketClassification(
+                ticketId,
+                request,
+                authentication.getName()
+        );
     }
     
 }
