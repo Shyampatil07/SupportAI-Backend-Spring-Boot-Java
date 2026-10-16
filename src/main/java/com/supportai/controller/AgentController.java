@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.supportai.dto.TicketClassificationUpdateRequest;
 import com.supportai.dto.TicketPriorityUpdateRequest;
 import com.supportai.dto.TicketResponse;
 import com.supportai.dto.TicketStatusUpdateRequest;
@@ -70,6 +71,20 @@ public class AgentController {
                         userEmail);
 
         return ResponseEntity.ok(response);
+    }
+    
+    @PatchMapping("/tickets/{ticketId}/classification")
+    @PreAuthorize("hasRole('AGENT')")
+    public TicketResponse updateTicketClassification(
+            @PathVariable Long ticketId,
+            @Valid @RequestBody TicketClassificationUpdateRequest request,
+            Authentication authentication) {
+
+        return ticketService.updateTicketClassification(
+                ticketId,
+                request,
+                authentication.getName()
+        );
     }
     
     
