@@ -11,8 +11,10 @@ import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.supportai.config.AiProperties;
 import com.supportai.dto.AiIntentResponse;
+import com.supportai.entity.AiIntent;
 //import com.supportai.enums.AiIntent;
 import com.supportai.service.AiIntentService;
+import com.supportai.service.OllamaService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class AiIntentServiceImpl implements AiIntentService {
 
     private final AiProperties aiProperties;
-
+//    private final OllamaService ollamaService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -49,6 +51,13 @@ public class AiIntentServiceImpl implements AiIntentService {
 
             return explicitUpdate;
         }
+        // 2. Explicit comment request
+        AiIntentResponse explicitComment =
+                detectExplicitComment(message);
+
+        if (explicitComment != null) {
+            return explicitComment;
+        }
 
         /*
          * If it is not an obvious update request,
@@ -69,6 +78,44 @@ public class AiIntentServiceImpl implements AiIntentService {
      * Update ticket 9 description to money was deducted
      * Change ticket 9 priority to HIGH
      */
+    
+    private AiIntentResponse detectExplicitComment(String message) {
+
+        if (message == null || message.isBlank()) {
+            return null;
+        }
+
+        String text = message.trim();
+
+        Pattern pattern = Pattern.compile(
+                "(?i)(?:add|write|post|leave)\\s+"
+                + "(?:a\\s+)?comment\\s+"
+                + "(?:to|on)\\s+"
+                + "ticket\\s*#?(\\d+)\\s+"
+                + "(?:saying|that|with)\\s+"
+                + "(.+)"
+        );
+
+        Matcher matcher = pattern.matcher(text);
+
+        if (!matcher.find()) {
+            return null;
+        }
+
+        Long ticketId =
+                Long.parseLong(matcher.group(1));
+
+        String comment =
+                matcher.group(2).trim();
+
+        return AiIntentResponse.builder()
+                .intent(AiIntent.ADD_COMMENT)
+                .ticketId(ticketId)
+                .comment(comment)
+                .build();
+    }
+    
+    
     private AiIntentResponse detectExplicitUpdate(String message) {
 
         if (message == null || message.isBlank()) {
