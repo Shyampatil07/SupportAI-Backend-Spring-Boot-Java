@@ -7,10 +7,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.supportai.dto.TicketClassificationUpdateRequest;
 import com.supportai.dto.TicketPriorityUpdateRequest;
 import com.supportai.dto.TicketResponse;
 import com.supportai.dto.TicketStatusUpdateRequest;
+import com.supportai.entity.TicketCategory;
+import com.supportai.entity.TicketPriority;
+import com.supportai.entity.TicketStatus;
 import com.supportai.service.TicketService;
 
 import jakarta.validation.Valid;
@@ -84,6 +93,39 @@ public class AgentController {
                 ticketId,
                 request,
                 authentication.getName()
+        );
+    }
+    
+    @GetMapping("/tickets/assigned/search")
+    public Page<TicketResponse> searchAssignedTickets(
+            @RequestParam(required = false)
+            TicketStatus status,
+
+            @RequestParam(required = false)
+            TicketPriority priority,
+
+            @RequestParam(required = false)
+            TicketCategory category,
+
+            @RequestParam(required = false)
+            String search,
+
+            @PageableDefault(
+                    size = 10,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable,
+
+            Authentication authentication) {
+
+        return ticketService.searchAssignedTickets(
+                authentication.getName(),
+                status,
+                priority,
+                category,
+                search,
+                pageable
         );
     }
     
