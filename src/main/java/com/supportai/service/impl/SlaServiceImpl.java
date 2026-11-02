@@ -36,7 +36,7 @@ public class SlaServiceImpl implements SlaService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional()
     public SlaStatusResponse getSlaStatus(
             Long ticketId,
             String userEmail) {
