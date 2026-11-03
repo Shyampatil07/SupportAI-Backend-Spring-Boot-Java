@@ -1,0 +1,453 @@
+# SupportAI – AI-Powered Smart Ticket Management System
+
+An intelligent customer support and ticket management backend built using **Java, Spring Boot, Spring Security, MySQL, Docker, and Ollama AI**.
+
+SupportAI helps manage customer support tickets through AI-powered classification, role-based access control, intelligent agent assignment, SLA monitoring, ticket history, notifications, and an AI chatbot.
+
+---
+
+## 1. Project Overview
+
+SupportAI is a backend application designed to streamline customer support operations.
+
+Customers can create and track support tickets, while agents and administrators can manage assignments, update ticket status, monitor SLA performance, and analyze support operations.
+
+The application integrates a locally hosted Large Language Model (LLM) using Ollama to provide AI-powered ticket classification and chatbot functionality.
+
+## 2. Key Features
+
+### Authentication and Authorization
+
+- User registration and login.
+- JWT-based authentication.
+- BCrypt password encryption.
+- Role-based authorization using Spring Security.
+- Roles: CUSTOMER, AGENT, MANAGER, ADMIN.
+- Protected REST APIs.
+
+### Ticket Management
+
+- Create, retrieve, update, and delete tickets.
+- Track ticket status, category, and priority.
+- View tickets created by the logged-in customer.
+- Advanced ticket search and filtering.
+- Assign tickets to support agents.
+- Maintain ticket history and comments.
+
+### AI-Powered Ticket Classification
+
+- Integration with Ollama and Llama 3.2.
+- Automatically classify incoming tickets.
+- AI-generated category and priority suggestions.
+- Store AI classification reason and results.
+
+### Intelligent Agent Assignment
+
+- Recommend suitable agents for tickets.
+- Consider agent workload and category expertise.
+- Rank recommended agents.
+- Support automatic ticket assignment.
+- Generate assignment notifications.
+
+### SLA Management
+
+- Priority-based SLA deadlines.
+- SLA status tracking.
+- Detect SLA breaches automatically.
+- Escalate breached tickets.
+- Notify managers about SLA breaches.
+- Track at-risk, compliant, and breached tickets.
+
+**SLA Policies**
+
+| Priority | Resolution Target |
+| -------- | ----------------: |
+| CRITICAL |           4 hours |
+| HIGH     |           8 hours |
+| MEDIUM   |          24 hours |
+| LOW      |          48 hours |
+
+### Admin Dashboard and Analytics
+
+- Total ticket statistics.
+- Ticket status distribution.
+- Priority and category distribution.
+- Agent workload monitoring.
+- Unassigned ticket tracking.
+- Date-range analytics.
+- Historical resolution analytics.
+- SLA analytics and reporting.
+
+### AI Support Chatbot
+
+- Conversation-aware chatbot.
+- Understand ticket-related user intents.
+- Create tickets through chatbot interactions.
+- Check ticket status.
+- List customer tickets.
+- Add ticket comments.
+- Retrieve relevant knowledge-base information using RAG.
+
+The AI interprets requests, while Spring Boot services handle authentication, authorization, and actual database operations.
+
+### Additional Features
+
+- Ticket history tracking.
+- Ticket comments.
+- Notification management.
+- Global exception handling.
+- REST API validation.
+- Unit testing with JUnit and Mockito.
+
+---
+
+## 3. Technology Stack
+
+| Category             | Technologies               |
+| -------------------- | -------------------------- |
+| Language             | Java 21                    |
+| Backend              | Spring Boot                |
+| Security             | Spring Security, JWT       |
+| ORM                  | Hibernate, Spring Data JPA |
+| Database             | MySQL 8.4                  |
+| AI / LLM             | Ollama, Llama 3.2          |
+| API Testing          | Postman                    |
+| Testing              | JUnit, Mockito             |
+| Containerization     | Docker, Docker Compose     |
+| Build Tool           | Maven                      |
+| Frontend Integration | REST APIs                  |
+
+---
+
+## 4. System Architecture
+
+```text
+                 CUSTOMER / AGENT / ADMIN
+                            |
+                            v
+                       POSTMAN / CLIENT
+                            |
+                            v
+                  SPRING BOOT REST APIs
+                            |
+                            v
+                 SPRING SECURITY + JWT
+                            |
+                            v
+                     SERVICE LAYER
+                            |
+          +-----------------+------------------+
+          |                 |                  |
+          v                 v                  v
+    Ticket Module      SLA Module         AI Services
+          |                 |                  |
+          v                 v                  v
+    Assignment         SLA Scheduler       Ollama LLM
+    Comments           Escalation          Llama 3.2
+    History            Analytics           Chatbot / RAG
+          |                 |                  |
+          +-----------------+------------------+
+                            |
+                            v
+                    SPRING DATA JPA
+                            |
+                            v
+                         MYSQL
+```
+
+### Architecture Explanation
+
+1. Client applications send HTTP requests to Spring Boot REST endpoints.
+2. Spring Security validates JWT tokens and user permissions.
+3. Controllers handle incoming requests.
+4. Service classes implement business logic.
+5. Spring Data JPA and Hibernate communicate with MySQL.
+6. Ollama provides local LLM capabilities for AI-related operations.
+7. Scheduled services monitor SLA deadlines and trigger escalations.
+
+---
+
+## 5. Application Modules and API Overview
+
+The following are representative API endpoints.
+
+### Authentication
+
+| Method | Endpoint             | Description                  |
+| ------ | -------------------- | ---------------------------- |
+| POST   | `/api/auth/register` | Register a user              |
+| POST   | `/api/auth/login`    | Authenticate and receive JWT |
+
+### Ticket Management
+
+| Method | Endpoint                 | Description             |
+| ------ | ------------------------ | ----------------------- |
+| POST   | `/api/tickets`           | Create a ticket         |
+| GET    | `/api/tickets/my`        | Get customer's tickets  |
+| GET    | `/api/tickets/{id}`      | Get ticket details      |
+| PATCH  | `/api/tickets/{id}`      | Update a ticket         |
+| DELETE | `/api/tickets/{id}`      | Delete a ticket         |
+| GET    | `/api/tickets/my/search` | Search customer tickets |
+
+### Ticket Comments and SLA
+
+| Method | Endpoint                     | Description       |
+| ------ | ---------------------------- | ----------------- |
+| POST   | `/api/tickets/{id}/comments` | Add a comment     |
+| GET    | `/api/tickets/{id}/comments` | Retrieve comments |
+| GET    | `/api/tickets/{id}/sla`      | Get SLA status    |
+
+### Agent Management
+
+| Method | Endpoint                                    | Description                   |
+| ------ | ------------------------------------------- | ----------------------------- |
+| GET    | `/api/agent/tickets/assigned/search`        | Search assigned tickets       |
+| POST   | `/api/admin/tickets/{ticketId}/auto-assign` | Automatically assign a ticket |
+
+### Admin Dashboard
+
+| Method | Endpoint                             | Description          |
+| ------ | ------------------------------------ | -------------------- |
+| GET    | `/api/admin/dashboard`               | Dashboard statistics |
+| GET    | `/api/admin/dashboard/analytics`     | Date-range analytics |
+| GET    | `/api/admin/dashboard/sla-analytics` | SLA analytics        |
+
+**Note:** Access to protected endpoints depends on the user's role and permissions. Refer to the controller mappings for the complete API list.
+
+---
+
+## 6. AI Integration
+
+SupportAI uses **Ollama** to run Llama 3.2 locally.
+
+### AI Ticket Classification
+
+```text
+Customer creates ticket
+        |
+        v
+AI Classification Service
+        |
+        v
+Ollama - Llama 3.2
+        |
+        v
+Category / Priority / Reason
+        |
+        v
+Spring Boot Service
+        |
+        v
+Save ticket and AI results in MySQL
+```
+
+### AI Chatbot
+
+The chatbot processes user messages and identifies intents such as:
+
+- CREATE_TICKET
+- CHECK_TICKET_STATUS
+- LIST_MY_TICKETS
+- ADD_COMMENT
+- UPDATE_TICKET
+- UNKNOWN
+
+The chatbot uses conversation context and knowledge-base retrieval to provide relevant responses.
+
+Business operations are performed by the backend services, not directly by the LLM.
+
+---
+
+## 7. SLA Management Workflow
+
+```text
+Ticket Created
+      |
+      v
+Calculate SLA Deadline
+      |
+      v
+Save SLA Deadline
+      |
+      v
+Scheduled SLA Checker
+      |
+      v
+Check Current Time
+      |
+      v
+SLA Deadline Exceeded?
+      |
+   +--+--+
+   |     |
+  YES    NO
+   |     |
+   v     v
+ Mark    Continue
+ Breach  Monitoring
+   |
+   v
+ Escalate Ticket
+   |
+   v
+ Notify Managers
+```
+
+SLA breach detection runs automatically using Spring Scheduling.
+
+---
+
+## 8. Docker Setup
+
+The application uses Docker Compose to run the Spring Boot backend and MySQL database.
+
+### Prerequisites
+
+- Java 21
+- Maven
+- Docker Desktop
+- Ollama
+- Llama 3.2 model
+
+### Step 1: Clone the Repository
+
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+cd supportai-backend
+```
+
+### Step 2: Start Ollama
+
+Install Ollama and download the model:
+
+```bash
+ollama pull llama3.2
+```
+
+Start the Ollama service and ensure it is accessible on port `11434`.
+
+### Step 3: Configure Environment Variables
+
+Configure the following values in your Docker Compose environment:
+
+```env
+DB_URL=jdbc:mysql://mysql:3306/supportai_db?createDatabaseIfNotExist=true
+DB_USERNAME=root
+DB_PASSWORD=your_database_password
+
+JWT_SECRET=your_base64_encoded_secret
+JWT_EXPIRATION=86400000
+
+AI_BASE_URL=http://host.docker.internal:11434
+AI_MODEL=llama3.2
+```
+
+Use a secure JWT secret and database password. Never commit real credentials to GitHub.
+
+### Step 4: Build and Start Containers
+
+```bash
+docker compose up --build -d
+```
+
+### Step 5: Check Running Containers
+
+```bash
+docker compose ps
+```
+
+### Step 6: View Logs
+
+```bash
+docker compose logs -f
+```
+
+### Step 7: Stop Containers
+
+```bash
+docker compose down
+```
+
+The MySQL database uses a named Docker volume for persistent data. Stopping containers does not delete database data.
+
+**Important:** Avoid `docker compose down -v` unless you intentionally want to delete the database volume.
+
+---
+
+## 9. Running Without Docker
+
+Configure MySQL and Ollama locally, then configure the required application environment variables.
+
+Build the application:
+
+```bash
+mvn clean package
+```
+
+Run the generated JAR:
+
+```bash
+java -jar target/*.jar
+```
+
+Backend URL:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## 10. Testing
+
+The REST APIs were tested using Postman.
+
+Testing includes:
+
+- User registration and authentication.
+- JWT validation and role-based access.
+- Ticket creation and updates.
+- AI ticket classification.
+- Agent assignment.
+- Ticket comments and history.
+- SLA status and breach detection.
+- SLA escalation and analytics.
+- Admin dashboard APIs.
+- AI chatbot operations.
+- Docker container restart and database persistence.
+
+JUnit and Mockito are used for backend unit testing.
+
+---
+
+## 11. Project Highlights
+
+- Built a secure backend using Spring Boot and Spring Security.
+- Implemented JWT authentication and role-based authorization.
+- Integrated a locally hosted LLM for ticket classification and chatbot operations.
+- Designed an automated SLA monitoring and escalation mechanism.
+- Developed intelligent agent recommendation using workload and expertise.
+- Implemented ticket analytics and historical resolution tracking.
+- Containerized the backend and database using Docker Compose.
+
+---
+
+## 12. Future Enhancements
+
+- Frontend dashboard integration.
+- Email notifications.
+- Microservices architecture.
+- Redis-based caching.
+- CI/CD pipeline.
+
+---
+
+## Author
+
+**Shyam Amol Lade**
+
+Java Backend Developer | Spring Boot | REST APIs | MySQL | Docker
+
+GitHub: [https://github.com/Shyampatil07](https://github.com/Shyampatil07)
+
+LinkedIn: [https://www.linkedin.com/in/shyam-lade-patil-o7/](https://www.linkedin.com/in/shyam-lade-patil-o7/)
